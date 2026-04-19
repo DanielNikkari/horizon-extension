@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon Settings</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <span class="logo">Horizon</span>
+      <label class="toggle" title="Enable / Disable">
+        <input type="checkbox" id="enabled-toggle" />
+        <span class="slider"></span>
+      </label>
+    </header>
+
+    <div class="section-label">Expertise Level</div>
+    <div class="segment" id="expertise-group" role="group">
+      <button class="seg-btn" data-level="beginner">Beginner</button>
+      <button class="seg-btn" data-level="intermediate">Intermediate</button>
+      <button class="seg-btn" data-level="advanced">Advanced</button>
+      <button class="seg-btn" data-level="expert">Expert</button>
+    </div>
+
+    <div class="section-label">AI Mode</div>
+    <div class="radio-group">
+      <label>
+        <input type="radio" name="ai-mode" value="remote" />
+        Remote (Claude API)
+      </label>
+      <label>
+        <input type="radio" name="ai-mode" value="local" />
+        Local (Ollama)
+      </label>
+    </div>
+
+    <!-- Remote settings -->
+    <div id="remote-settings">
+      <div class="field">
+        <label for="api-key">API Key</label>
+        <div class="input-row">
+          <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off" />
+          <button id="toggle-key" type="button" class="icon-btn" title="Show/hide">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="remote-model">Model</label>
+        <input type="text" id="remote-model" placeholder="claude-opus-4-5" />
+      </div>
+    </div>
+
+    <!-- Local settings -->
+    <div id="local-settings" class="hidden">
+      <div class="field">
+        <label for="ollama-host">Ollama Host</label>
+        <input type="text" id="ollama-host" placeholder="http://localhost:11434" />
+      </div>
+      <div class="field">
+        <label for="local-model">Model Name</label>
+        <input type="text" id="local-model" placeholder="llama3.2" />
+      </div>
+      <button id="test-btn" type="button" class="secondary-btn">Test Connection</button>
+      <div id="test-result" class="hidden test-result"></div>
+    </div>
+
+    <div class="section-label">Debounce Delay</div>
+    <div class="slider-row">
+      <input type="range" id="debounce-slider" min="200" max="2000" step="50" />
+      <span id="debounce-value">800ms</span>
+    </div>
+
+    <div class="footer">
+      Settings saved automatically
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

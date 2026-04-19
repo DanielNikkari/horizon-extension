@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon</title>
+  <link rel="stylesheet" href="panel.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="header-left">
+        <span class="logo">Horizon</span>
+      </div>
+      <div class="header-right">
+        <span class="badge" id="expertise-badge">Intermediate</span>
+      </div>
+    </header>
+
+    <section id="input-section">
+      <label for="selected-text">Selected text</label>
+      <textarea id="selected-text" placeholder="Select text on any webpage…" rows="4" spellcheck="false"></textarea>
+      <button id="explain-btn" type="button">Explain</button>
+    </section>
+
+    <section id="explanation-section" class="hidden">
+      <div id="loading" class="hidden">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div id="explanation-content"></div>
+      <div id="error-message" class="hidden error"></div>
+    </section>
+
+    <section id="followups-section" class="hidden">
+      <p class="followups-label">Explore further</p>
+      <ul id="followup-list"></ul>
+    </section>
+
+    <div id="empty-state">
+      <div class="empty-icon">✦</div>
+      <p>Highlight text on any page to get an AI explanation.</p>
+    </div>
+  </div>
+
+  <script src="panel.js"></script>
+</body>
+</html>
