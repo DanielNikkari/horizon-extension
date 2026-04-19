@@ -8,37 +8,6 @@
   --radius-lg: 14px;
 }
 
-/* ── Expertise-level accent overrides ───────────────────── */
-/* Intermediate: charcoal/neutral (Ollama-style) — light */
-[data-level="intermediate"] {
-  --accent:       #171717;
-  --accent-hover: #000000;
-  --accent-bg:    rgba(0,0,0,0.05);
-}
-[data-level="beginner"] {
-  --accent:       #16a34a;
-  --accent-hover: #15803d;
-  --accent-bg:    rgba(34,197,94,0.10);
-}
-[data-level="advanced"] {
-  --accent:       #d97706;
-  --accent-hover: #b45309;
-  --accent-bg:    rgba(217,119,6,0.10);
-}
-[data-level="expert"] {
-  --accent:       #7c3aed;
-  --accent-hover: #6d28d9;
-  --accent-bg:    rgba(124,58,237,0.10);
-}
-
-/* Dark mode: intermediate uses near-white */
-@media (prefers-color-scheme: dark) {
-  [data-level="intermediate"] {
-    --accent:       #f5f5f5;
-    --accent-hover: #ffffff;
-    --accent-bg:    rgba(255,255,255,0.07);
-  }
-}
 /* Light theme */
 [data-theme="light"] {
   --bg:        #ffffff;
@@ -115,6 +84,20 @@
     --success:   #16a34a;
     color-scheme: light;
   }
+}
+
+/* ── Expertise-level accent overrides (must be AFTER theme blocks) ── */
+/* These override --accent regardless of theme. Same specificity [0,1,0]
+   but declared later, so they win over the theme defaults. */
+[data-level="beginner"]     { --accent: #16a34a; --accent-hover: #15803d; --accent-bg: rgba(22,163,74,0.10); }
+[data-level="intermediate"] { --accent: #171717; --accent-hover: #000000; --accent-bg: rgba(0,0,0,0.05); }
+[data-level="advanced"]     { --accent: #d97706; --accent-hover: #b45309; --accent-bg: rgba(217,119,6,0.10); }
+[data-level="expert"]       { --accent: #7c3aed; --accent-hover: #6d28d9; --accent-bg: rgba(124,58,237,0.10); }
+
+/* Intermediate in dark mode flips to near-white (combined selector = higher specificity) */
+[data-theme="dark"][data-level="intermediate"]   { --accent: #f5f5f5; --accent-hover: #ffffff; --accent-bg: rgba(255,255,255,0.07); }
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"][data-level="intermediate"] { --accent: #f5f5f5; --accent-hover: #ffffff; --accent-bg: rgba(255,255,255,0.07); }
 }
 
 /* ── Base ────────────────────────────────────────────────── */
