@@ -2,14 +2,35 @@ import { getSettings } from './utils/storage.js';
 import { streamExplanation, fetchFollowUps, testConnection } from './utils/api.js';
 
 let panelPort = null;
+let pendingText = null; // text that arrived before panel connected
 
 // Make clicking the extension icon open/close the side panel
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+
+// Inject content script into all existing http/https tabs on install/update
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] }, tabs => {
+    for (const tab of tabs) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content-script.js'],
+      }).catch(() => {}); // tab may not allow scripts — ignore
+    }
+  });
+});
 
 // Panel connects on load via chrome.runtime.connect
 chrome.runtime.onConnect.addListener(port => {
   if (port.name !== 'panel-port') return;
   panelPort = port;
+
+  // If a selection arrived before the panel was open, process it now
+  if (pendingText) {
+    const text = pendingText;
+    pendingText = null;
+    setTimeout(() => handleExplain(text), 200);
+  }
+
   port.onDisconnect.addListener(() => { panelPort = null; });
 });
 
@@ -20,27 +41,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
 
     case 'SELECTION_FINAL':
-      handleExplain(message.text, sender.tab?.id);
+      if (panelPort) {
+        handleExplain(message.text);
+      } else {
+        // Panel not open yet — store and it will be picked up on connect
+        pendingText = message.text;
+      }
       break;
 
     case 'FOLLOW_UP_CLICK':
-      handleExplain(message.text, message.tabId);
+      handleExplain(message.text);
       break;
 
     case 'TEST_CONNECTION':
       testConnection(message.settings).then(result => sendResponse(result));
       return true; // async
 
-    case 'OPEN_PANEL':
-      if (sender.tab?.id) chrome.sidePanel.open({ tabId: sender.tab.id });
+    case 'GET_SELECTION':
+      // Panel asking for the latest pending text
+      if (pendingText) {
+        sendResponse({ text: pendingText });
+        pendingText = null;
+      } else {
+        sendResponse({ text: null });
+      }
       break;
   }
 });
 
-async function handleExplain(text, tabId) {
+async function handleExplain(text) {
   const settings = await getSettings();
 
-  // Small delay to let panel initialize its port connection
+  // Small delay to ensure panel port is fully ready
   await sleep(150);
 
   panelPort?.postMessage({ type: 'EXPLAIN_START', text });
@@ -64,7 +96,6 @@ async function handleExplain(text, tabId) {
     }
   );
 
-  // Fallback: if stream ended without calling onDone
   if (!doneCalled) onDone();
 }
 
@@ -75,7 +106,7 @@ async function generateFollowUps(text, settings) {
       panelPort?.postMessage({ type: 'FOLLOW_UPS', questions });
     }
   } catch {
-    // follow-ups are best-effort
+    // best-effort
   }
 }
 

@@ -30,11 +30,25 @@
   const testResult = document.getElementById('test-result');
   const debounceSlider = document.getElementById('debounce-slider');
   const debounceValue = document.getElementById('debounce-value');
+  const themeGroup = document.getElementById('theme-group');
 
   let port = null;
   let userIsEditing = false;
   let explanationBuffer = '';
   let currentTabId = null;
+
+  // ── Theme ────────────────────────────────────────────────
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+  }
+
+  themeGroup.addEventListener('click', e => {
+    const btn = e.target.closest('.theme-btn');
+    if (!btn) return;
+    applyTheme(btn.dataset.theme);
+    chrome.storage.sync.set({ theme: btn.dataset.theme });
+  });
 
   // ── Port connection ──────────────────────────────────────
   function connectPort() {
@@ -43,6 +57,15 @@
     port.onDisconnect.addListener(() => {
       port = null;
       setTimeout(connectPort, 500);
+    });
+
+    // Ask background if there's a pending selection we missed
+    chrome.runtime.sendMessage({ type: 'GET_SELECTION' }, response => {
+      if (response?.text) {
+        textarea.value = response.text;
+        emptyState.classList.add('hidden');
+        handleExplainText(response.text);
+      }
     });
   }
 
@@ -53,7 +76,7 @@
     switch (msg.type) {
       case 'SELECTION_LIVE':
         if (!userIsEditing) textarea.value = msg.text;
-        showEmptyState(false);
+        emptyState.classList.add('hidden');
         break;
       case 'EXPLAIN_START':
         if (!userIsEditing) textarea.value = msg.text;
@@ -111,22 +134,24 @@
     questions.slice(0, 3).forEach(q => {
       const li = document.createElement('li');
       li.textContent = q;
-      li.addEventListener('click', () => sendFollowUp(q));
+      li.addEventListener('click', () => {
+        textarea.value = q;
+        handleExplainText(q);
+      });
       followupList.appendChild(li);
     });
     followupsSection.classList.remove('hidden');
   }
 
-  function sendFollowUp(question) {
-    textarea.value = question;
-    chrome.runtime.sendMessage({ type: 'FOLLOW_UP_CLICK', text: question, tabId: currentTabId }).catch(() => {});
+  function handleExplainText(text) {
+    chrome.runtime.sendMessage({ type: 'FOLLOW_UP_CLICK', text, tabId: currentTabId }).catch(() => {});
   }
 
   // ── Manual explain button ────────────────────────────────
   explainBtn.addEventListener('click', () => {
     const text = textarea.value.trim();
     if (!text) return;
-    chrome.runtime.sendMessage({ type: 'FOLLOW_UP_CLICK', text, tabId: currentTabId }).catch(() => {});
+    handleExplainText(text);
   });
 
   // ── Textarea focus guard ─────────────────────────────────
@@ -154,7 +179,9 @@
     localModel: 'llama3.2',
     debounceDelay: 800,
     ollamaHost: 'http://localhost:11434',
+    theme: 'system',
   }, prefs => {
+    applyTheme(prefs.theme);
     enabledToggle.checked = prefs.enabled;
     setActiveLevel(prefs.expertiseLevel);
     expertiseBadge.textContent = capitalize(prefs.expertiseLevel);
@@ -230,10 +257,13 @@
   debounceSlider.addEventListener('input', () => { debounceValue.textContent = debounceSlider.value + 'ms'; });
   debounceSlider.addEventListener('change', () => { chrome.storage.sync.set({ debounceDelay: Number(debounceSlider.value) }); });
 
-  // ── Expertise badge sync (from other sources) ────────────
+  // ── Storage change sync ──────────────────────────────────
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'sync') return;
-    if (changes.expertiseLevel) expertiseBadge.textContent = capitalize(changes.expertiseLevel.newValue);
+    if (changes.expertiseLevel) {
+      expertiseBadge.textContent = capitalize(changes.expertiseLevel.newValue);
+      setActiveLevel(changes.expertiseLevel.newValue);
+    }
   });
 
   // ── Get current tab ──────────────────────────────────────
@@ -248,31 +278,26 @@
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
     const lines = html.split('\n');
-    const output = [];
+    const out = [];
     let inList = false;
     for (const line of lines) {
       const m = line.match(/^[-*]\s+(.+)/);
       if (m) {
-        if (!inList) { output.push('<ul>'); inList = true; }
-        output.push(`<li>${m[1]}</li>`);
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push(`<li>${m[1]}</li>`);
       } else {
-        if (inList) { output.push('</ul>'); inList = false; }
-        output.push(line);
+        if (inList) { out.push('</ul>'); inList = false; }
+        out.push(line);
       }
     }
-    if (inList) output.push('</ul>');
+    if (inList) out.push('</ul>');
 
-    return output.join('\n')
-      .split(/\n\n+/)
-      .map(block => {
-        const t = block.trim();
-        if (!t || t.startsWith('<ul') || t.startsWith('<li')) return t;
-        return `<p>${t.replace(/\n/g, '<br>')}</p>`;
-      })
-      .join('');
+    return out.join('\n').split(/\n\n+/).map(block => {
+      const t = block.trim();
+      if (!t || t.startsWith('<ul') || t.startsWith('<li')) return t;
+      return `<p>${t.replace(/\n/g, '<br>')}</p>`;
+    }).join('');
   }
 
-  // ── Helpers ──────────────────────────────────────────────
-  function showEmptyState(visible) { emptyState.classList.toggle('hidden', !visible); }
   function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
 })();

@@ -7,6 +7,7 @@ export const DEFAULTS = {
   localModel: 'llama3.2',
   debounceDelay: 800,
   ollamaHost: 'http://localhost:11434',
+  theme: 'system',
 };
 
 export function getSettings() {
