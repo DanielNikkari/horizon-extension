@@ -8,6 +8,28 @@
   --radius-lg: 14px;
 }
 
+/* ── Expertise-level accent overrides ───────────────────── */
+[data-level="beginner"] {
+  --accent:       #16a34a;
+  --accent-hover: #15803d;
+  --accent-bg:    rgba(34,197,94,0.12);
+}
+[data-level="intermediate"] {
+  --accent:       #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-bg:    rgba(59,130,246,0.12);
+}
+[data-level="advanced"] {
+  --accent:       #ea580c;
+  --accent-hover: #c2410c;
+  --accent-bg:    rgba(249,115,22,0.12);
+}
+[data-level="expert"] {
+  --accent:       #9333ea;
+  --accent-hover: #7e22ce;
+  --accent-bg:    rgba(168,85,247,0.12);
+}
+
 /* Dark theme */
 [data-theme="dark"] {
   --bg:        #0d0d0d;

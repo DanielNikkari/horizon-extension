@@ -212,6 +212,7 @@
   function setActiveLevel(level) {
     document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.level === level));
     expertiseBadge.className = `badge level-${level}`;
+    document.documentElement.setAttribute('data-level', level);
   }
 
   // ── AI mode ──────────────────────────────────────────────
