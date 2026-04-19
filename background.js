@@ -3,6 +3,9 @@ import { streamExplanation, fetchFollowUps, testConnection } from './utils/api.j
 
 let panelPort = null;
 
+// Make clicking the extension icon open/close the side panel
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+
 // Panel connects on load via chrome.runtime.connect
 chrome.runtime.onConnect.addListener(port => {
   if (port.name !== 'panel-port') return;
@@ -36,10 +39,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handleExplain(text, tabId) {
   const settings = await getSettings();
-
-  if (tabId) {
-    try { await chrome.sidePanel.open({ tabId }); } catch { /* panel may already be open */ }
-  }
 
   // Small delay to let panel initialize its port connection
   await sleep(150);

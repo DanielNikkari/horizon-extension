@@ -8,40 +8,108 @@
 </head>
 <body>
   <div id="app">
-    <header>
-      <div class="header-left">
-        <span class="logo">Horizon</span>
+
+    <!-- ── Main view ── -->
+    <div id="main-view">
+      <header>
+        <div class="header-left">
+          <span class="logo">Horizon</span>
+          <span class="badge" id="expertise-badge">Intermediate</span>
+        </div>
+        <div class="header-right">
+          <label class="toggle" title="Enable / Disable">
+            <input type="checkbox" id="enabled-toggle" checked />
+            <span class="slider"></span>
+          </label>
+          <button id="settings-btn" class="icon-btn" title="Settings">⚙</button>
+        </div>
+      </header>
+
+      <section id="input-section">
+        <label for="selected-text">Selected text</label>
+        <textarea id="selected-text" placeholder="Select text on any webpage…" rows="4" spellcheck="false"></textarea>
+        <button id="explain-btn" type="button">Explain</button>
+      </section>
+
+      <section id="explanation-section" class="hidden">
+        <div id="loading" class="hidden">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div id="explanation-content"></div>
+        <div id="error-message" class="hidden error"></div>
+      </section>
+
+      <section id="followups-section" class="hidden">
+        <p class="followups-label">Explore further</p>
+        <ul id="followup-list"></ul>
+      </section>
+
+      <div id="empty-state">
+        <div class="empty-icon">✦</div>
+        <p>Highlight text on any page to get an AI explanation.</p>
       </div>
-      <div class="header-right">
-        <span class="badge" id="expertise-badge">Intermediate</span>
-      </div>
-    </header>
-
-    <section id="input-section">
-      <label for="selected-text">Selected text</label>
-      <textarea id="selected-text" placeholder="Select text on any webpage…" rows="4" spellcheck="false"></textarea>
-      <button id="explain-btn" type="button">Explain</button>
-    </section>
-
-    <section id="explanation-section" class="hidden">
-      <div id="loading" class="hidden">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-      </div>
-      <div id="explanation-content"></div>
-      <div id="error-message" class="hidden error"></div>
-    </section>
-
-    <section id="followups-section" class="hidden">
-      <p class="followups-label">Explore further</p>
-      <ul id="followup-list"></ul>
-    </section>
-
-    <div id="empty-state">
-      <div class="empty-icon">✦</div>
-      <p>Highlight text on any page to get an AI explanation.</p>
     </div>
-  </div>
 
+    <!-- ── Settings view ── -->
+    <div id="settings-view" class="hidden">
+      <header>
+        <button id="back-btn" class="icon-btn" title="Back">←</button>
+        <span class="logo">Settings</span>
+      </header>
+
+      <div class="settings-body">
+        <div class="section-label">Expertise Level</div>
+        <div class="segment" id="expertise-group">
+          <button class="seg-btn" data-level="beginner">Beginner</button>
+          <button class="seg-btn" data-level="intermediate">Intermediate</button>
+          <button class="seg-btn" data-level="advanced">Advanced</button>
+          <button class="seg-btn" data-level="expert">Expert</button>
+        </div>
+
+        <div class="section-label">AI Mode</div>
+        <div class="radio-group">
+          <label><input type="radio" name="ai-mode" value="remote" /> Remote (Claude API)</label>
+          <label><input type="radio" name="ai-mode" value="local" /> Local (Ollama)</label>
+        </div>
+
+        <div id="remote-settings">
+          <div class="field">
+            <label for="api-key">API Key</label>
+            <div class="input-row">
+              <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off" />
+              <button id="toggle-key" type="button" class="small-btn">👁</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="remote-model">Model</label>
+            <input type="text" id="remote-model" placeholder="claude-opus-4-5" />
+          </div>
+        </div>
+
+        <div id="local-settings" class="hidden">
+          <div class="field">
+            <label for="ollama-host">Ollama Host</label>
+            <input type="text" id="ollama-host" placeholder="http://localhost:11434" />
+          </div>
+          <div class="field">
+            <label for="local-model">Model Name</label>
+            <input type="text" id="local-model" placeholder="llama3.2" />
+          </div>
+          <button id="test-btn" type="button" class="secondary-btn">Test Connection</button>
+          <div id="test-result" class="hidden test-result"></div>
+        </div>
+
+        <div class="section-label">Debounce Delay</div>
+        <div class="slider-row">
+          <input type="range" id="debounce-slider" min="200" max="2000" step="50" />
+          <span id="debounce-value">800ms</span>
+        </div>
+
+        <p class="save-note">Settings saved automatically</p>
+      </div>
+    </div>
+
+  </div>
   <script src="panel.js"></script>
 </body>
 </html>
