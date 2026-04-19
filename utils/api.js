@@ -105,7 +105,14 @@ async function streamOllama(text, settings, onChunk, onDone, onError) {
   }
 
   if (!response.ok) {
-    onError(`Ollama error ${response.status}`);
+    if (response.status === 403) {
+      onError(
+        'Ollama blocked the request (403). ' +
+        'Restart Ollama with: OLLAMA_ORIGINS=* ollama serve'
+      );
+    } else {
+      onError(`Ollama error ${response.status}`);
+    }
     return;
   }
 
