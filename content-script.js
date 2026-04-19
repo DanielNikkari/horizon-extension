@@ -1,4 +1,7 @@
 (function () {
+  if (window.__horizonLoaded) return;
+  window.__horizonLoaded = true;
+
   let enabled = true;
   let debounceDelay = 800;
   let debounceTimer = null;
