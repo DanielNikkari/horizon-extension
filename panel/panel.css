@@ -270,6 +270,13 @@ textarea::placeholder { color: var(--text-muted); }
 #explain-btn:hover { background: var(--accent-hover); }
 #explain-btn:active { opacity: 0.9; }
 
+/* Dark + intermediate: near-white button needs dark text */
+[data-theme="dark"][data-level="intermediate"] #explain-btn,
+[data-theme="dark"][data-level="intermediate"] .toggle input:checked + .slider::after { color: #0d0d0d; }
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"][data-level="intermediate"] #explain-btn { color: #0d0d0d; }
+}
+
 /* ── Explanation section ────────────────────────────────── */
 #explanation-section {
   flex: 1;
